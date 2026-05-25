@@ -62,11 +62,13 @@
 
                 <div class="post-body">
                     <p>今日、いつも通らない路地を散歩していたら、見慣れない看板を見つけました。</p>
-                    <p>錆びついていて文字がよく読めなかったのですが、なんだか不気味な感じがして…</p>
                     
-                    <img src="/mitaka-kenji-blog/images/sign_error.jpg" alt="[画像ファイルが破損しています。復元を試みますか？]" class="post-image" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22500%22 height=%22300%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23eee%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-family=%22sans-serif%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%23999%22%3ENO IMAGE%3C/text%3E%3C/svg%3E'">
-
-                    <p>気のせいかもしれませんが、写真を撮ったとき、誰かに見られているような<span class="hidden-text">たすけて</span>気がしました。</p>
+                    <p class="glitch-text">錆びついていて文字がよく読めなかったのですが、なんだか不気味な感じがして…</p>
+                    
+                    <img src="/mitaka-kenji-blog/images/sign_error.jpg" alt="..." class="post-image">
+                
+                    <p class="glitch-text">気のせいかもしれませんが、写真を撮ったとき、誰かに見られているような気がしました。</p>
+                    
                     <p>もしこの看板がある場所を知っている人がいたら、教えてください。</p>
                 </div>
             </article>
@@ -117,6 +119,61 @@
                 // search.htmlにキーワードを渡す
                 window.location.href = "/mitaka-kenji-blog/search.html?q=" + encodeURIComponent(keyword);
             }
+        }
+        const glitchChars = "¡¢£¤¥¦§¨©ª«¬®¯°±²³´µ¶·¸¹º»¼½¾¿ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ!@#$%^&*";
+
+        // 2. 目印（class="glitch-text"）のついた要素をすべて取得
+        const glitchElements = document.querySelectorAll('.glitch-text');
+
+        // 各要素について、元のテキストを保存しておく
+        glitchElements.forEach(el => {
+            el.dataset.originalText = el.textContent;
+        });
+
+        // 3. 文字をランダムに化けさせるメインの関数
+        function doGlitch() {
+            // 目印がついた要素の中から、ランダムに1つ選ぶ
+            const targetElement = glitchElements[Math.floor(Math.random() * glitchElements.length)];
+            const originalText = targetElement.dataset.originalText;
+            
+            // 文字を分解
+            let textArray = originalText.split('');
+            
+            // 何文字化けさせるか（全文字数の10%〜30%くらいがおすすめ）
+            const glitchAmount = Math.floor(textArray.length * 0.15); 
+
+            // ランダムに選んだ文字を化け文字に置き換える
+            for (let i = 0; i < glitchAmount; i++) {
+                const randomIndex = Math.floor(Math.random() * textArray.length);
+                // スペース（空白）は化けさせないほうが読みやすい
+                if (textArray[randomIndex] !== ' ') {
+                    textArray[randomIndex] = glitchChars[Math.floor(Math.random() * glitchChars.length)];
+                }
+            }
+
+            // 化けたテキストを表示
+            targetElement.textContent = textArray.join('');
+
+            // 【超重要】一瞬（例えば150ミリ秒）後に、元のテキストに戻す
+            setTimeout(() => {
+                targetElement.textContent = originalText;
+            }, 150);
+        }
+
+        // 4. エフェクトを実行するタイミングを制御する関数（不規則にする）
+        function scheduleNextGlitch() {
+            // 次のエフェクトまでの待ち時間をランダムに設定（例：3秒〜10秒の間）
+            const nextDelay = Math.random() * (10000 - 3000) + 3000;
+
+            setTimeout(() => {
+                doGlitch(); // エフェクト実行
+                scheduleNextGlitch(); // 終わったら、また次の実行を予約（ループさせる）
+            }, nextDelay);
+        }
+
+        // サイトが表示されたら、不規則なループを開始
+        if (glitchElements.length > 0) {
+            scheduleNextGlitch();
         }
     </script>
 </body>
