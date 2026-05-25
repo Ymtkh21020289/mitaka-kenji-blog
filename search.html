@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>検索結果 - 何気ない日常の記録</title>
+    <style>
+        body { font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif; background-color: #f4f4f4; color: #333; margin: 0; padding: 20px; }
+        .container { background: #fff; max-width: 800px; margin: 0 auto; padding: 30px; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .result-item { border-bottom: 1px dashed #ccc; padding: 15px 0; }
+        .result-item:last-child { border-bottom: none; }
+        .result-title a { font-size: 1.2em; color: #3498db; text-decoration: none; font-weight: bold; }
+        .result-snippet { font-size: 0.9em; color: #555; margin-top: 5px; }
+        .keyword-highlight { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>「<span id="display-keyword" class="keyword-highlight"></span>」の検索結果</h2>
+        
+        <div id="results-container"></div>
+        
+        <p style="margin-top: 30px;"><a href="/mitaka-kenji-blog/index.html">トップページに戻る</a></p>
+    </div>
+
+    <script>
+        // 1. URLから「?q=キーワード」の部分を読み取る
+        const urlParams = new URLSearchParams(window.location.search);
+        const query = urlParams.get('q');
+
+        // 画面に検索キーワードを表示
+        document.getElementById('display-keyword').textContent = query || "空欄";
+
+        // 2. 簡易データベース（検索キーワードと、ヒットする記事のリスト）
+        const mockDatabase = {
+            "日記": [
+                { title: "最近見つけた変な看板", url: "/mitaka-kenji-blog/diary/2026/05/25/index.html", snippet: "今日散歩していたら、見慣れない看板を見つけました。なんだか不気味な感じがして…" },
+                { title: "古い手帳の解読", url: "/mitaka-kenji-blog/diary/2026/05/20/index.html", snippet: "祖父の遺品から古い手帳が出てきました。書かれている文字が読めないのですが…" }
+            ],
+            "手帳": [
+                { title: "古い手帳の解読", url: "/mitaka-kenji-blog/diary/2026/05/20/index.html", snippet: "祖父の遺品から古い手帳が出てきました。書かれている文字が読めないのですが…" }
+            ],
+            // 【ARGギミック】特定のワードで検索した時だけ、関係ない不気味な記事も一緒にヒットさせる
+            "たすけて": [
+                { title: "Error. log missing.", url: "/mitaka-kenji-blog/hidden/sos.html", snippet: "見つけないで 見つけないで 見つけないで 見つけないで" },
+                { title: "最近見つけた変な看板", url: "/mitaka-kenji-blog/diary/2026/05/25/index.html", snippet: "今日散歩していたら、見慣れない看板を見つけました。" }
+            ]
+        };
+
+        // 3. 検索結果を表示する処理
+        const resultsContainer = document.getElementById('results-container');
+
+        if (query && mockDatabase[query]) {
+            // キーワードがデータベースに存在する場合、複数ヒットした記事を順番に表示
+            const hits = mockDatabase[query];
+            let html = `<p>${hits.length}件の記事が見つかりました。</p>`;
+            
+            hits.forEach(item => {
+                html += `
+                <div class="result-item">
+                    <div class="result-title"><a href="${item.url}">${item.title}</a></div>
+                    <div class="result-snippet">${item.snippet}</div>
+                </div>
+                `;
+            });
+            resultsContainer.innerHTML = html;
+        } else {
+            // キーワードが存在しない場合の表示
+            resultsContainer.innerHTML = "<p>一致する記事は見つかりませんでした。別のキーワードをお試しください。</p>";
+        }
+    </script>
+</body>
+</html>
